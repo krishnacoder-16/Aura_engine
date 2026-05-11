@@ -5,17 +5,20 @@ import {
   getCoreRowModel,
   flexRender,
   ColumnDef,
+  SortingState,
+  OnChangeFn,
 } from "@tanstack/react-table";
 import { InventoryItem } from "@/features/inventory/types";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { cn } from "@/lib/utils";
-import { ArrowUpDown, Package2 } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Package2 } from "lucide-react";
 
 // ─── Column definitions ────────────────────────────────────────────────────
 const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "sku",
     header: "SKU",
+    enableSorting: false,
     cell: ({ getValue }) => (
       <span className="font-mono text-[12px] font-semibold text-slate-500 tracking-wide">
         {getValue<string>()}
@@ -25,6 +28,7 @@ const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "name",
     header: "Product Name",
+    enableSorting: true,
     cell: ({ getValue }) => (
       <span className="text-[13px] font-medium text-foreground">
         {getValue<string>()}
@@ -34,6 +38,7 @@ const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "category",
     header: "Category",
+    enableSorting: false,
     cell: ({ getValue }) => (
       <span className="text-[12px] text-muted-foreground">
         {getValue<string>()}
@@ -43,6 +48,7 @@ const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "stock",
     header: "Stock",
+    enableSorting: true,
     cell: ({ row }) => {
       const stock = row.original.stock;
       const reorder = row.original.reorderPoint;
@@ -66,6 +72,7 @@ const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "price",
     header: "Unit Price",
+    enableSorting: true,
     cell: ({ getValue }) => (
       <span className="text-[13px] font-semibold text-foreground tabular-nums">
         ${getValue<number>().toFixed(2)}
@@ -75,11 +82,13 @@ const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    enableSorting: false,
     cell: ({ getValue }) => <StatusBadge status={getValue<InventoryItem["status"]>()} />,
   },
   {
     accessorKey: "supplier",
     header: "Supplier",
+    enableSorting: false,
     cell: ({ getValue }) => (
       <span className="text-[12px] text-muted-foreground">{getValue<string>()}</span>
     ),
@@ -87,6 +96,7 @@ const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "warehouse",
     header: "Warehouse",
+    enableSorting: false,
     cell: ({ getValue }) => (
       <span className="inline-flex items-center rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">
         {getValue<string>()}
@@ -96,6 +106,7 @@ const columns: ColumnDef<InventoryItem>[] = [
   {
     accessorKey: "lastUpdated",
     header: "Last Updated",
+    enableSorting: true,
     cell: ({ getValue }) => (
       <span className="text-[12px] text-muted-foreground tabular-nums">
         {getValue<string>()}
@@ -125,29 +136,22 @@ function EmptyState() {
   );
 }
 
-// ─── Sortable Header Cell ──────────────────────────────────────────────────
-function SortableHeader({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1 group/header">
-      {label}
-      <ArrowUpDown
-        size={11}
-        strokeWidth={2}
-        className="text-muted-foreground/40 group-hover/header:text-muted-foreground transition-colors"
-      />
-    </span>
-  );
-}
-
 // ─── Main Table Component ──────────────────────────────────────────────────
 interface InventoryTableProps {
   data: InventoryItem[];
+  sorting?: SortingState;
+  onSortingChange?: OnChangeFn<SortingState>;
 }
 
-export default function InventoryTable({ data }: InventoryTableProps) {
+export default function InventoryTable({ data, sorting = [], onSortingChange }: InventoryTableProps) {
   const table = useReactTable({
     data,
     columns,
+    state: {
+      sorting,
+    },
+    onSortingChange,
+    manualSorting: true, // We will sort externally to simulate server sorting
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -158,20 +162,44 @@ export default function InventoryTable({ data }: InventoryTableProps) {
         <thead className="sticky top-0 z-10 bg-slate-50 border-b border-border">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground whitespace-nowrap first:pl-5 last:pr-5"
-                >
-                  <SortableHeader
-                    label={
-                      header.isPlaceholder
-                        ? ""
-                        : flexRender(header.column.columnDef.header, header.getContext()) as string
-                    }
-                  />
-                </th>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const canSort = header.column.getCanSort();
+                const isSorted = header.column.getIsSorted();
+
+                return (
+                  <th
+                    key={header.id}
+                    className={cn(
+                      "px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap first:pl-5 last:pr-5 group transition-colors",
+                      canSort ? "cursor-pointer hover:bg-slate-100/50" : "",
+                      isSorted ? "text-foreground" : "text-muted-foreground"
+                    )}
+                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                  >
+                    <div className="flex items-center gap-1.5 select-none">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                      
+                      {canSort && (
+                        <div className="flex items-center justify-center w-3 h-3">
+                          {isSorted === "asc" ? (
+                            <ArrowUp size={11} strokeWidth={2.5} className="text-orange-500" />
+                          ) : isSorted === "desc" ? (
+                            <ArrowDown size={11} strokeWidth={2.5} className="text-orange-500" />
+                          ) : (
+                            <ArrowUpDown
+                              size={11}
+                              strokeWidth={2}
+                              className="text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors"
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>
