@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, SlidersHorizontal, Download, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Search, SlidersHorizontal, Download, ChevronLeft, ChevronRight, X, RefreshCw } from "lucide-react";
 import { INVENTORY_CATEGORIES } from "@/mock/inventory";
 import { cn } from "@/lib/utils";
 import { InventoryFilters } from "@/features/inventory/types";
@@ -12,6 +12,7 @@ interface InventoryToolbarProps {
   updateFilter: <K extends keyof InventoryFilters>(key: K, value: InventoryFilters[K]) => void;
   resetFilters: () => void;
   hasActiveFilters: boolean;
+  isSearching?: boolean;
 }
 
 export function InventoryToolbar({
@@ -19,6 +20,7 @@ export function InventoryToolbar({
   updateFilter,
   resetFilters,
   hasActiveFilters,
+  isSearching = false,
 }: InventoryToolbarProps) {
   const [showFilters, setShowFilters] = useState(false);
 
@@ -27,10 +29,17 @@ export function InventoryToolbar({
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4">
         {/* Search */}
         <div className="relative flex-1 max-w-xs">
-          <Search
-            size={13}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 pointer-events-none"
-          />
+          {isSearching ? (
+            <RefreshCw
+              size={13}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-orange-500 animate-spin"
+            />
+          ) : (
+            <Search
+              size={13}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 pointer-events-none"
+            />
+          )}
           <input
             id="inventory-search"
             type="text"

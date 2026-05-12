@@ -156,10 +156,10 @@ export default function InventoryTable({ data, sorting = [], onSortingChange }: 
   });
 
   return (
-    <div className="overflow-auto">
-      <table className="w-full border-collapse min-w-[960px]">
+    <div className="overflow-auto max-h-[calc(100vh-360px)] min-h-[300px]">
+      <table className="w-full border-separate border-spacing-0 min-w-[960px]">
         {/* Sticky Header */}
-        <thead className="sticky top-0 z-10 bg-slate-50 border-b border-border">
+        <thead className="sticky top-0 z-10 bg-slate-50 border-b border-border shadow-[0_1px_0_0_rgba(0,0,0,0.05)]">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
@@ -170,7 +170,7 @@ export default function InventoryTable({ data, sorting = [], onSortingChange }: 
                   <th
                     key={header.id}
                     className={cn(
-                      "px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap first:pl-5 last:pr-5 group transition-colors",
+                      "px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap first:pl-5 last:pr-5 group transition-colors border-b border-border",
                       canSort ? "cursor-pointer hover:bg-slate-100/50" : "",
                       isSorted ? "text-foreground" : "text-muted-foreground"
                     )}

@@ -13,11 +13,16 @@ import { Plus, RefreshCw } from "lucide-react";
 import { usePagination } from "@/hooks/usePagination";
 import { useSorting } from "@/hooks/useSorting";
 import { useFilters } from "@/hooks/useFilters";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function InventoryPage() {
   const data = MOCK_INVENTORY;
 
   const { filters, updateFilter, resetFilters, hasActiveFilters } = useFilters();
+  
+  // Debounce the search input for better performance and enterprise feel
+  const debouncedSearch = useDebounce(filters.search, 500);
+  const isSearching = filters.search !== debouncedSearch;
 
   const { sorting, onSortingChange } = useSorting([
     { id: "name", desc: false }, // Default sort
@@ -26,15 +31,19 @@ export default function InventoryPage() {
   // Apply advanced filtering
   const filteredData = useMemo(() => {
     return data.filter((item) => {
-      // String filters
-      if (
-        filters.search &&
-        !item.name.toLowerCase().includes(filters.search.toLowerCase()) &&
-        !item.sku.toLowerCase().includes(filters.search.toLowerCase()) &&
-        !item.supplier.toLowerCase().includes(filters.search.toLowerCase())
-      ) {
-        return false;
+      // Global Omnisearch (SKU, Name, Category, Supplier)
+      if (debouncedSearch) {
+        const searchLower = debouncedSearch.toLowerCase();
+        const matchesSearch = 
+          item.name.toLowerCase().includes(searchLower) ||
+          item.sku.toLowerCase().includes(searchLower) ||
+          item.category.toLowerCase().includes(searchLower) ||
+          item.supplier.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
       }
+
+      // Explicit filters
       if (filters.category && item.category !== filters.category) return false;
       if (filters.status && item.status !== filters.status) return false;
 
@@ -45,7 +54,7 @@ export default function InventoryPage() {
 
       return true;
     });
-  }, [data, filters]);
+  }, [data, filters, debouncedSearch]);
 
   const {
     currentPage,
@@ -97,7 +106,7 @@ export default function InventoryPage() {
           id="refresh-inventory-btn"
           className="flex items-center gap-1.5 text-[12px] font-medium px-3.5 py-2 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
         >
-          <RefreshCw size={12} strokeWidth={2.5} />
+          <RefreshCw size={12} strokeWidth={2.5} className={cn(isSearching && "animate-spin")} />
           Refresh
         </button>
         <button
@@ -120,6 +129,7 @@ export default function InventoryPage() {
           updateFilter={updateFilter}
           resetFilters={resetFilters}
           hasActiveFilters={hasActiveFilters}
+          isSearching={isSearching}
         />
 
         {/* Table — scrolls horizontally on small screens */}
@@ -144,3 +154,9 @@ export default function InventoryPage() {
     </>
   );
 }
+
+// Small helper for conditional classes
+function cn(...classes: any[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
