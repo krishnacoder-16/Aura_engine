@@ -1,185 +1,104 @@
-import { InventoryItem } from "@/features/inventory/types";
+import { InventoryItem, StockStatus } from "@/features/inventory/types";
 
-export const MOCK_INVENTORY: InventoryItem[] = [
-  {
-    id: "1",
-    sku: "SKU-0032",
-    name: "Industrial Ball Bearing 6203",
-    category: "Mechanical Parts",
-    stock: 8,
-    reorderPoint: 25,
-    price: 12.5,
-    cost: 7.2,
-    status: "low_stock",
-    supplier: "NTN Bearings Ltd",
-    warehouse: "Warehouse A",
-    lastUpdated: "2026-05-10",
-  },
-  {
-    id: "2",
-    sku: "SKU-0045",
-    name: "Hydraulic Seal Kit 32mm",
-    category: "Seals & Gaskets",
-    stock: 245,
-    reorderPoint: 50,
-    price: 38.0,
-    cost: 21.5,
-    status: "in_stock",
-    supplier: "Parker Hannifin",
-    warehouse: "Warehouse B",
-    lastUpdated: "2026-05-09",
-  },
-  {
-    id: "3",
-    sku: "SKU-0118",
-    name: "Stainless Steel Hex Bolt M10",
-    category: "Fasteners",
-    stock: 0,
-    reorderPoint: 200,
-    price: 0.85,
-    cost: 0.4,
-    status: "out_of_stock",
-    supplier: "Bossard Group",
-    warehouse: "Warehouse A",
-    lastUpdated: "2026-05-08",
-  },
-  {
-    id: "4",
-    sku: "SKU-0201",
-    name: "Pneumatic Cylinder 50mm Bore",
-    category: "Pneumatics",
-    stock: 54,
-    reorderPoint: 20,
-    price: 142.0,
-    cost: 88.0,
-    status: "in_stock",
-    supplier: "SMC Corporation",
-    warehouse: "Warehouse C",
-    lastUpdated: "2026-05-11",
-  },
-  {
-    id: "5",
-    sku: "SKU-0289",
-    name: "V-Belt Drive A-Section",
-    category: "Power Transmission",
-    stock: 12,
-    reorderPoint: 30,
-    price: 22.75,
-    cost: 13.0,
-    status: "low_stock",
-    supplier: "Gates Industrial",
-    warehouse: "Warehouse A",
-    lastUpdated: "2026-05-07",
-  },
-  {
-    id: "6",
-    sku: "SKU-0334",
-    name: "Electric Motor 1.5kW 3-Phase",
-    category: "Electrical",
-    stock: 19,
-    reorderPoint: 10,
-    price: 385.0,
-    cost: 220.0,
-    status: "in_stock",
-    supplier: "Siemens AG",
-    warehouse: "Warehouse B",
-    lastUpdated: "2026-05-10",
-  },
-  {
-    id: "7",
-    sku: "SKU-0412",
-    name: "Carbon Steel Pipe 2 inch SCH40",
-    category: "Piping",
-    stock: 0,
-    reorderPoint: 15,
-    price: 58.9,
-    cost: 32.0,
-    status: "discontinued",
-    supplier: "Atlas Steels",
-    warehouse: "Warehouse C",
-    lastUpdated: "2026-04-30",
-  },
-  {
-    id: "8",
-    sku: "SKU-0509",
-    name: "Centrifugal Pump 50L/min",
-    category: "Fluid Handling",
-    stock: 7,
-    reorderPoint: 5,
-    price: 620.0,
-    cost: 390.0,
-    status: "in_stock",
-    supplier: "Grundfos",
-    warehouse: "Warehouse A",
-    lastUpdated: "2026-05-11",
-  },
-  {
-    id: "9",
-    sku: "SKU-0637",
-    name: "Timing Belt 480H075",
-    category: "Power Transmission",
-    stock: 3,
-    reorderPoint: 10,
-    price: 18.4,
-    cost: 9.5,
-    status: "low_stock",
-    supplier: "Gates Industrial",
-    warehouse: "Warehouse B",
-    lastUpdated: "2026-05-06",
-  },
-  {
-    id: "10",
-    sku: "SKU-0714",
-    name: "Digital Pressure Gauge 0–16 bar",
-    category: "Instrumentation",
-    stock: 88,
-    reorderPoint: 20,
-    price: 74.0,
-    cost: 44.0,
-    status: "in_stock",
-    supplier: "Wika Instruments",
-    warehouse: "Warehouse C",
-    lastUpdated: "2026-05-09",
-  },
-  {
-    id: "11",
-    sku: "SKU-0821",
-    name: "Polyurethane Conveyor Belt 1000mm",
-    category: "Material Handling",
-    stock: 31,
-    reorderPoint: 10,
-    price: 215.0,
-    cost: 130.0,
-    status: "in_stock",
-    supplier: "Habasit AG",
-    warehouse: "Warehouse A",
-    lastUpdated: "2026-05-08",
-  },
-  {
-    id: "12",
-    sku: "SKU-0903",
-    name: "Solenoid Valve 24VDC 1/2 inch",
-    category: "Pneumatics",
-    stock: 0,
-    reorderPoint: 12,
-    price: 89.5,
-    cost: 52.0,
-    status: "out_of_stock",
-    supplier: "SMC Corporation",
-    warehouse: "Warehouse B",
-    lastUpdated: "2026-05-05",
-  },
-];
+// Helper to generate realistic SKUs
+const generateSKU = (i: number) => `SKU-${1000 + i}`;
 
-export const INVENTORY_CATEGORIES = [
-  "Mechanical Parts",
-  "Seals & Gaskets",
-  "Fasteners",
-  "Pneumatics",
-  "Power Transmission",
-  "Electrical",
-  "Piping",
-  "Fluid Handling",
-  "Instrumentation",
-  "Material Handling",
-];
+// Categories and corresponding item prefixes
+const CATEGORY_MAP: Record<string, { prefixes: string[], suppliers: string[] }> = {
+  "Mechanical Parts": {
+    prefixes: ["Industrial Ball Bearing", "Roller Bearing", "Linear Guide", "V-Belt", "Drive Shaft", "Gear Assembly", "Coupling", "Pulley"],
+    suppliers: ["NTN Bearings Ltd", "SKF Group", "TIMKEN", "NSK Ltd"]
+  },
+  "Seals & Gaskets": {
+    prefixes: ["Hydraulic Seal Kit", "O-Ring Set", "Mechanical Seal", "Gasket Sheet", "Lip Seal", "V-Ring", "Oil Seal"],
+    suppliers: ["Parker Hannifin", "Freudenberg", "Trelleborg", "James Walker"]
+  },
+  "Fasteners": {
+    prefixes: ["Hex Bolt", "Socket Head Screw", "Lock Nut", "Flat Washer", "Threaded Rod", "Spring Washer", "Anchor Bolt"],
+    suppliers: ["Bossard Group", "Wurth", "Fastenal", "Hilti"]
+  },
+  "Pneumatics": {
+    prefixes: ["Pneumatic Cylinder", "Solenoid Valve", "Air Filter", "Pressure Regulator", "Fitting", "Pneumatic Tubing", "Manifold"],
+    suppliers: ["SMC Corporation", "Festo", "Norgren", "Aventics"]
+  },
+  "Power Transmission": {
+    prefixes: ["Timing Belt", "Chain Drive", "Conveyor Belt", "Gearbox", "Servo Motor", "Clutch Plate", "Torque Limiter"],
+    suppliers: ["Gates Industrial", "Habasit AG", "Bonfiglioli", "SEW Eurodrive"]
+  },
+  "Electrical": {
+    prefixes: ["Electric Motor", "Circuit Breaker", "Relay", "Terminal Block", "Power Supply", "Sensor", "PLC Module"],
+    suppliers: ["Siemens AG", "Schneider Electric", "ABB", "Rockwell Automation"]
+  },
+  "Piping": {
+    prefixes: ["Carbon Steel Pipe", "Stainless Tube", "Elbow Fitting", "Flange", "Ball Valve", "Check Valve", "Gate Valve"],
+    suppliers: ["Atlas Steels", "Swagelok", "Victaulic", "Crane Co."]
+  },
+  "Fluid Handling": {
+    prefixes: ["Centrifugal Pump", "Diaphragm Pump", "Flow Meter", "Control Valve", "Filter Housing", "Dosing Pump"],
+    suppliers: ["Grundfos", "Flowserve", "Kirloskar", "Wilo"]
+  },
+  "Instrumentation": {
+    prefixes: ["Pressure Gauge", "Temperature Transmitter", "Level Sensor", "Flow Controller", "Digital Indicator"],
+    suppliers: ["Wika Instruments", "Endress+Hauser", "Emerson", "Yokogawa"]
+  },
+  "Material Handling": {
+    prefixes: ["Conveyor Roller", "Castor Wheel", "Lifting Slings", "Forklift Forks", "Storage Rack", "Pallet Jack"],
+    suppliers: ["Interroll", "Hyster-Yale", "Toyota Material Handling", "Jungheinrich"]
+  }
+};
+
+const CATEGORIES = Object.keys(CATEGORY_MAP);
+const WAREHOUSES = ["Warehouse A", "Warehouse B", "Warehouse C", "Central Hub", "External Storage"];
+const SIZES = ["10mm", "12mm", "15mm", "20mm", "25mm", "32mm", "40mm", "50mm", "1/2 inch", "3/4 inch", "1 inch"];
+
+const generateRandomData = (count: number): InventoryItem[] => {
+  const items: InventoryItem[] = [];
+  
+  for (let i = 1; i <= count; i++) {
+    const category = CATEGORIES[i % CATEGORIES.length];
+    const config = CATEGORY_MAP[category];
+    const prefix = config.prefixes[i % config.prefixes.length];
+    const supplier = config.suppliers[i % config.suppliers.length];
+    const size = SIZES[i % SIZES.length];
+    const warehouse = WAREHOUSES[i % WAREHOUSES.length];
+    
+    const stock = Math.floor(Math.random() * 500);
+    const reorderPoint = 10 + Math.floor(Math.random() * 50);
+    const price = 5 + Math.random() * 1000;
+    const cost = price * (0.5 + Math.random() * 0.3);
+    
+    let status: StockStatus = "in_stock";
+    if (stock === 0) {
+      status = Math.random() > 0.3 ? "out_of_stock" : "discontinued";
+    } else if (stock <= reorderPoint) {
+      status = "low_stock";
+    }
+
+    // Dates from last 30 days
+    const date = new Date();
+    date.setDate(date.getDate() - Math.floor(Math.random() * 30));
+    const lastUpdated = date.toISOString().split("T")[0];
+
+    items.push({
+      id: i.toString(),
+      sku: generateSKU(i),
+      name: `${prefix} ${size}`,
+      category,
+      stock,
+      reorderPoint,
+      price,
+      cost,
+      status,
+      supplier,
+      warehouse,
+      lastUpdated
+    });
+  }
+  
+  return items;
+};
+
+export const MOCK_INVENTORY: InventoryItem[] = generateRandomData(300);
+
+export const INVENTORY_CATEGORIES = CATEGORIES;
+
