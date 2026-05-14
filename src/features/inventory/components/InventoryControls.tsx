@@ -13,6 +13,8 @@ interface InventoryToolbarProps {
   resetFilters: () => void;
   hasActiveFilters: boolean;
   isSearching?: boolean;
+  onExport?: () => void;
+  isExporting?: boolean;
 }
 
 export function InventoryToolbar({
@@ -21,6 +23,8 @@ export function InventoryToolbar({
   resetFilters,
   hasActiveFilters,
   isSearching = false,
+  onExport,
+  isExporting = false,
 }: InventoryToolbarProps) {
   const [showFilters, setShowFilters] = useState(false);
 
@@ -118,10 +122,19 @@ export function InventoryToolbar({
         {/* Export */}
         <button
           id="inventory-export-btn"
-          className="flex items-center gap-1.5 h-9 px-3.5 text-[12px] font-semibold rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/20"
+          onClick={onExport}
+          disabled={isExporting}
+          className={cn(
+            "flex items-center gap-1.5 h-9 px-3.5 text-[12px] font-semibold rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors shadow-sm shadow-orange-500/20",
+            isExporting && "opacity-70 cursor-not-allowed"
+          )}
         >
-          <Download size={13} strokeWidth={2.5} />
-          Export CSV
+          {isExporting ? (
+            <RefreshCw size={13} className="animate-spin" />
+          ) : (
+            <Download size={13} strokeWidth={2.5} />
+          )}
+          {isExporting ? "Exporting..." : "Export CSV"}
         </button>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import InventoryStatsStrip from "@/features/inventory/components/InventoryStatsStrip";
 import InventoryTable from "@/features/inventory/components/InventoryTable";
@@ -14,9 +14,11 @@ import { usePagination } from "@/hooks/usePagination";
 import { useSorting } from "@/hooks/useSorting";
 import { useFilters } from "@/hooks/useFilters";
 import { useDebounce } from "@/hooks/useDebounce";
+import { downloadCSV, getFormattedDate } from "@/lib/csv-utils";
 
 export default function InventoryPage() {
   const data = MOCK_INVENTORY;
+  const [isExporting, setIsExporting] = useState(false);
 
   const { filters, updateFilter, resetFilters, hasActiveFilters } = useFilters();
   
@@ -89,6 +91,31 @@ export default function InventoryPage() {
     });
   }, [filteredData, sorting]);
 
+  // CSV Export Handler
+  const handleExport = () => {
+    setIsExporting(true);
+    
+    // Small delay to show loading state for enterprise feel
+    setTimeout(() => {
+      const headers = [
+        "sku", 
+        "name", 
+        "category", 
+        "stock", 
+        "price", 
+        "status", 
+        "supplier", 
+        "warehouse", 
+        "lastUpdated"
+      ];
+      
+      const filename = `aura-inventory-export-${getFormattedDate()}.csv`;
+      
+      downloadCSV(sortedData, headers, filename);
+      setIsExporting(false);
+    }, 800);
+  };
+
   // Simulate server-side pagination
   const paginatedData = sortedData.slice(
     (currentPage - 1) * pageSize,
@@ -130,6 +157,8 @@ export default function InventoryPage() {
           resetFilters={resetFilters}
           hasActiveFilters={hasActiveFilters}
           isSearching={isSearching}
+          onExport={handleExport}
+          isExporting={isExporting}
         />
 
         {/* Table — scrolls horizontally on small screens */}

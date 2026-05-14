@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   Package2,
   BarChart3,
-  Download,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -18,7 +17,6 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/",          icon: LayoutDashboard },
   { label: "Inventory", href: "/inventory", icon: Package2 },
   { label: "Analytics", href: "/analytics", icon: BarChart3 },
-  { label: "Export",    href: "/export",    icon: Download },
   { label: "Settings",  href: "/settings",  icon: Settings },
 ];
 
