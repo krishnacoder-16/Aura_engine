@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import PageHeader from "@/components/shared/PageHeader";
 import InventoryStatsStrip from "@/features/inventory/components/InventoryStatsStrip";
 import InventoryTable from "@/features/inventory/components/InventoryTable";
@@ -14,14 +14,24 @@ import { usePagination } from "@/hooks/usePagination";
 import { useSorting } from "@/hooks/useSorting";
 import { useFilters } from "@/hooks/useFilters";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useSettings, formatDate, formatCurrency } from "@/context/SettingsContext";
 import { downloadCSV, getFormattedDate } from "@/lib/csv-utils";
+import { cn } from "@/lib/utils";
 
 export default function InventoryPage() {
+  const { rowsPerPage, defaultWarehouse, dateFormat, currency } = useSettings();
   const data = MOCK_INVENTORY;
   const [isExporting, setIsExporting] = useState(false);
 
   const { filters, updateFilter, resetFilters, hasActiveFilters } = useFilters();
   
+  // Set initial warehouse filter if specified in settings
+  useEffect(() => {
+    if (defaultWarehouse && defaultWarehouse !== "All Warehouses") {
+      updateFilter("warehouse", defaultWarehouse);
+    }
+  }, [defaultWarehouse]);
+
   // Debounce the search input for better performance and enterprise feel
   const debouncedSearch = useDebounce(filters.search, 500);
   const isSearching = filters.search !== debouncedSearch;
@@ -48,6 +58,7 @@ export default function InventoryPage() {
       // Explicit filters
       if (filters.category && item.category !== filters.category) return false;
       if (filters.status && item.status !== filters.status) return false;
+      if (filters.warehouse && item.warehouse !== filters.warehouse) return false;
 
       // Numeric filters
       if (filters.maxStock !== null && item.stock > filters.maxStock) return false;
@@ -68,8 +79,13 @@ export default function InventoryPage() {
     changePageSize,
   } = usePagination({
     totalItems: filteredData.length,
-    initialPageSize: 10,
+    initialPageSize: rowsPerPage, // Use global setting
   });
+
+  // Keep pagination in sync with settings if changed
+  useEffect(() => {
+    changePageSize(rowsPerPage);
+  }, [rowsPerPage]);
 
   // Simulate server-side sorting
   const sortedData = useMemo(() => {
@@ -184,8 +200,5 @@ export default function InventoryPage() {
   );
 }
 
-// Small helper for conditional classes
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(" ");
-}
+
 

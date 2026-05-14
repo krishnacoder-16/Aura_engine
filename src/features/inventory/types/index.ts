@@ -23,6 +23,7 @@ export interface InventoryFilters {
   search: string;
   category: string;
   status: StockStatus | "";
+  warehouse: string;
   maxStock: number | null;
   minPrice: number | null;
   maxPrice: number | null;

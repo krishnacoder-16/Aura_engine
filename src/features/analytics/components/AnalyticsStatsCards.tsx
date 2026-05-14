@@ -8,7 +8,10 @@ interface AnalyticsStatsCardsProps {
   data: InventoryItem[];
 }
 
+import { useSettings, formatCurrency } from "@/context/SettingsContext";
+
 export function AnalyticsStatsCards({ data }: AnalyticsStatsCardsProps) {
+  const { currency } = useSettings();
   const totalSKUs = data.length;
   const totalValue = data.reduce((acc, item) => acc + (item.stock * item.price), 0);
   const outOfStock = data.filter(item => item.status === "out_of_stock").length;
@@ -24,7 +27,7 @@ export function AnalyticsStatsCards({ data }: AnalyticsStatsCardsProps) {
     },
     {
       label: "Total Inventory Value",
-      value: `$${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+      value: formatCurrency(totalValue, currency),
       icon: DollarSign,
       color: "text-green-500",
       bg: "bg-green-500/10",

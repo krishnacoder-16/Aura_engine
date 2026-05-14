@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Enterprise Inventory Management Dashboard",
 };
 
+import { Providers } from "@/components/Providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +30,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-full overflow-hidden">{children}</body>
+      <body className="h-full overflow-hidden">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

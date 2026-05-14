@@ -11,8 +11,10 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
+import { useSettings } from "@/context/SettingsContext";
+
 export default function AppShell({ children }: AppShellProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { sidebarCollapsed, updateSettings } = useSettings();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
@@ -28,12 +30,17 @@ export default function AppShell({ children }: AppShellProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const toggleSidebar = () => {
+    updateSettings({ sidebarCollapsed: !sidebarCollapsed });
+    // Note: This updates the setting immediately. Since it's persisted, it feels "global".
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Desktop Sidebar */}
       <Sidebar
         collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((prev) => !prev)}
+        onToggle={toggleSidebar}
       />
 
       {/* Mobile Sidebar Drawer */}
