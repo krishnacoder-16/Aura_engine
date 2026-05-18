@@ -20,6 +20,7 @@ interface SettingsState {
 
 interface SettingsContextType extends SettingsState {
   updateSettings: (updates: Partial<SettingsState>) => void;
+  updateInstantSetting: (updates: Partial<SettingsState>) => void;
   resetSettings: () => void;
   isDirty: boolean;
   saveSettings: () => void;
@@ -65,6 +66,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setPendingSettings((prev) => ({ ...prev, ...updates }));
   };
 
+  const updateInstantSetting = (updates: Partial<SettingsState>) => {
+    setSettings((prev) => {
+      const next = { ...prev, ...updates };
+      localStorage.setItem("aura-settings", JSON.stringify(next));
+      return next;
+    });
+    setPendingSettings((prev) => ({ ...prev, ...updates }));
+  };
+
   const saveSettings = () => {
     setSettings(pendingSettings);
     localStorage.setItem("aura-settings", JSON.stringify(pendingSettings));
@@ -84,6 +94,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         ...settings, 
         pendingSettings,
         updateSettings, 
+        updateInstantSetting,
         saveSettings,
         resetSettings,
         isDirty 

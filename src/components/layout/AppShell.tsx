@@ -14,7 +14,7 @@ interface AppShellProps {
 import { useSettings } from "@/context/SettingsContext";
 
 export default function AppShell({ children }: AppShellProps) {
-  const { sidebarCollapsed, updateSettings } = useSettings();
+  const { sidebarCollapsed, updateInstantSetting } = useSettings();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
@@ -31,8 +31,7 @@ export default function AppShell({ children }: AppShellProps) {
   }, []);
 
   const toggleSidebar = () => {
-    updateSettings({ sidebarCollapsed: !sidebarCollapsed });
-    // Note: This updates the setting immediately. Since it's persisted, it feels "global".
+    updateInstantSetting({ sidebarCollapsed: !sidebarCollapsed });
   };
 
   return (

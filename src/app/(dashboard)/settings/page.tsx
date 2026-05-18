@@ -33,7 +33,7 @@ function SettingsSection({ title, description, children }: SettingsSectionProps)
 }
 
 export default function SettingsPage() {
-  const { isDirty, saveSettings, resetSettings } = useSettings();
+  const { isDirty, saveSettings, resetSettings, sidebarCollapsed } = useSettings();
   const [isSaving, setIsSaving] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
 
@@ -48,7 +48,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-28 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="max-w-5xl mx-auto space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <PageHeader 
         title="Settings" 
         subtitle="Configure your Aura Engine environment and personal preferences." 
@@ -98,12 +98,12 @@ export default function SettingsPage() {
         </SettingsSection>
       </div>
 
-      {/* Action Footer - Sticky/Fixed */}
+      {/* Action Footer - Static Form Action Section */}
       <div className={cn(
-        "fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-5xl px-6 transition-all duration-300 z-50",
-        isDirty || showSaved ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0 pointer-events-none"
+        "transition-all duration-300 ease-in-out",
+        isDirty || showSaved ? "mt-8 opacity-100" : "opacity-0 pointer-events-none select-none h-0 mt-0 overflow-hidden"
       )}>
-        <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border border-border rounded-2xl p-3 shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex items-center justify-between border-orange-500/20">
+        <div className="bg-white/80 dark:bg-slate-900/90 border border-border rounded-2xl p-4 shadow-sm flex items-center justify-between border-orange-500/20">
           <div className="flex items-center gap-3 px-3">
             {showSaved ? (
               <div className="flex items-center gap-2 text-green-600 animate-in fade-in zoom-in-95">
